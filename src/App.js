@@ -40,21 +40,44 @@ const App = () => {
 
     const storiesReducer = (state, action) => {
         console.log('storiesReducer state: ', state);
+        console.log('storiesReducer type: ', action.type);
 
         switch (action.type) {
-            case 'SET_STORIES':
-                return action.payload;
+            case 'STORIES_FETCH_INIT':
+                return {
+                    ...state,
+                    isLoding: true,
+                    isError: false,
+                };
+            case 'STORIES_FETCH_SUCCESS':
+                return {
+                    ...state,
+                    data: action.payload,
+                    isLoding: false,
+                    isError: false,
+                };
+            case 'STORIES_FETCH_FAILURE':
+                return {
+                    ...state,
+                    isLoding: false,
+                    isError: true,
+                };
             case 'REMOVE_STORY':
-                return state.filter(
-                    (story) => action.payload.objectID !== story.objectID
-                );
+                return {
+                    ...state,
+                    data: state.data.filter(
+                        (story) => action.payload.objectID !== story.objectID
+                    ),
+                };
             default:
                 throw new Error();
         }
     };
-    const [stories, dispatchStories] = React.useReducer(storiesReducer, []);
-    const [isLoding, setIsLoding] = React.useState(false);
-    const [isError, setIsError] = React.useState(false);
+    const [stories, dispatchStories] = React.useReducer(storiesReducer, {
+        data: [],
+        isLoding: false,
+        isError: false,
+    });
 
     const handleRemoveStory = (item) => {
         dispatchStories({
@@ -67,7 +90,7 @@ const App = () => {
 
     React.useEffect(() => {
         setSearchStories(
-            stories.filter(function (story) {
+            stories.data.filter(function (story) {
                 console.log('searchStories: ', story.title);
                 return story.title
                     .toLowerCase()
@@ -77,25 +100,25 @@ const App = () => {
     }, [stories, searchTerm]);
 
     const getAsyncStories = () =>
-        new Promise((resolve) =>
-            setTimeout(() => {
-                resolve({ data: { stories: initialStories } });
-            }, 2000)
-        );
+        new Promise((resolve, reject) => {
+            setTimeout(reject, 2000);
+        });
 
     // Effect会在首次渲染的时候会被执行一次
     React.useEffect(() => {
-        setIsLoding(true);
+        dispatchStories({ type: 'STORIES_FETCH_INIT' });
         getAsyncStories()
             .then((result) => {
                 dispatchStories({
-                    type: 'SET_STORIES',
+                    type: 'STORIES_FETCH_SUCCESS',
                     payload: result.data.stories,
                 });
-                setIsLoding(false);
-                // throw Error;
             })
-            .catch(() => setIsError(true));
+            .catch(() =>
+                dispatchStories({
+                    type: 'STORIES_FETCH_FAILURE',
+                })
+            );
     }, []);
 
     return (
@@ -110,8 +133,8 @@ const App = () => {
                 Search
             </InputWithLabel>
             <hr />
-            {isError && <p>Something went wrong...</p>}
-            {isLoding ? (
+            {stories.isError && <p>Something went wrong...</p>}
+            {stories.isLoding ? (
                 <p>Loding...</p>
             ) : (
                 <List list={searchStories} onRemoveItem={handleRemoveStory} />
