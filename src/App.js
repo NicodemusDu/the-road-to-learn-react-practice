@@ -39,6 +39,8 @@ const App = () => {
     };
 
     const [stores, setStores] = React.useState([]);
+    const [isLoding, setIsLoding] = React.useState(false);
+    const [isError, setIsError] = React.useState(false);
 
     const handleRemoveStory = (item) => {
         const newStories = stores.filter(
@@ -70,10 +72,15 @@ const App = () => {
 
     // Effect会在首次渲染的时候会被执行一次
     React.useEffect(() => {
-        getAsyncStories().then((result) => {
-            setStores(result.data.stories);
-        });
-    });
+        setIsLoding(true);
+        getAsyncStories()
+            .then((result) => {
+                setStores(result.data.stories);
+                setIsLoding(false);
+                throw Error;
+            })
+            .catch(() => setIsError(true));
+    }, []);
 
     return (
         <>
@@ -87,7 +94,12 @@ const App = () => {
                 Search
             </InputWithLabel>
             <hr />
-            <List list={searchStories} onRemoveItem={handleRemoveStory} />
+            {isError && <p>Something went wrong...</p>}
+            {isLoding ? (
+                <p>Loding...</p>
+            ) : (
+                <List list={searchStories} onRemoveItem={handleRemoveStory} />
+            )}
         </>
     );
 };
