@@ -64,23 +64,12 @@ const App = () => {
         });
     };
 
-    const [searchStories, setSearchStories] = React.useState([]);
-
-    React.useEffect(() => {
-        setSearchStories(
-            stories.data.filter(function (story) {
-                return story.title
-                    .toLowerCase()
-                    .includes(searchTerm.toLowerCase());
-            })
-        );
-    }, [stories, searchTerm]);
-
     // Effect会在首次渲染的时候会被执行一次
     React.useEffect(() => {
+        if (!searchTerm) return;
         dispatchStories({ type: 'STORIES_FETCH_INIT' });
 
-        fetch(`${API_ENDPOINT}react`)
+        fetch(`${API_ENDPOINT}${searchTerm}`)
             .then((response) => response.json())
             .then((result) =>
                 dispatchStories({
@@ -93,7 +82,7 @@ const App = () => {
                     type: 'STORIES_FETCH_FAILURE',
                 })
             );
-    }, []);
+    }, [searchTerm]);
 
     return (
         <>
@@ -111,7 +100,7 @@ const App = () => {
             {stories.isLoding ? (
                 <p>Loding...</p>
             ) : (
-                <List list={searchStories} onRemoveItem={handleRemoveStory} />
+                <List list={stories.data} onRemoveItem={handleRemoveStory} />
             )}
         </>
     );
