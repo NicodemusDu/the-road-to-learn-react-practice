@@ -65,7 +65,8 @@ const App = () => {
     };
 
     // Effect会在首次渲染的时候会被执行一次
-    React.useEffect(() => {
+    const handleFetchStories = React.useCallback(() => {
+        console.log('handleFetchStories');
         if (!searchTerm) return;
         dispatchStories({ type: 'STORIES_FETCH_INIT' });
 
@@ -83,6 +84,12 @@ const App = () => {
                 })
             );
     }, [searchTerm]);
+
+    React.useEffect(() => {
+        console.log('useEffect');
+
+        // handleFetchStories();
+    }, [handleFetchStories]);
 
     return (
         <>
