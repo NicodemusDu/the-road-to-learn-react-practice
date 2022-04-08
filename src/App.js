@@ -38,30 +38,43 @@ const App = () => {
         console.log('handleSearch: ', event.target.value);
     };
 
-    const [stores, setStores] = React.useState([]);
+    const storiesReducer = (state, action) => {
+        console.log('storiesReducer state: ', state);
+
+        switch (action.type) {
+            case 'SET_STORIES':
+                return action.payload;
+            case 'REMOVE_STORY':
+                return state.filter(
+                    (story) => action.payload.objectID !== story.objectID
+                );
+            default:
+                throw new Error();
+        }
+    };
+    const [stories, dispatchStories] = React.useReducer(storiesReducer, []);
     const [isLoding, setIsLoding] = React.useState(false);
     const [isError, setIsError] = React.useState(false);
 
     const handleRemoveStory = (item) => {
-        const newStories = stores.filter(
-            (story) => item.objectID !== story.objectID
-        );
-        setStores(newStories);
-        console.log('newStories: ', newStories);
+        dispatchStories({
+            type: 'REMOVE_STORY',
+            payload: item,
+        });
     };
 
     const [searchStories, setSearchStories] = React.useState(initialStories);
 
     React.useEffect(() => {
         setSearchStories(
-            stores.filter(function (story) {
+            stories.filter(function (story) {
                 console.log('searchStories: ', story.title);
                 return story.title
                     .toLowerCase()
                     .includes(searchTerm.toLowerCase());
             })
         );
-    }, [stores, searchTerm]);
+    }, [stories, searchTerm]);
 
     const getAsyncStories = () =>
         new Promise((resolve) =>
@@ -75,9 +88,12 @@ const App = () => {
         setIsLoding(true);
         getAsyncStories()
             .then((result) => {
-                setStores(result.data.stories);
+                dispatchStories({
+                    type: 'SET_STORIES',
+                    payload: result.data.stories,
+                });
                 setIsLoding(false);
-                throw Error;
+                // throw Error;
             })
             .catch(() => setIsError(true));
     }, []);
