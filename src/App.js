@@ -1,5 +1,8 @@
 import React from 'react';
 import axios from 'axios';
+import cs from 'classname';
+
+import styles from './App.module.css';
 
 const API_ENDPOINT = 'https://hn.algolia.com/api/v1/search?query=';
 const useSemiPersistentState = (key, initState) => {
@@ -47,7 +50,7 @@ const storiesReducer = (state, action) => {
 };
 const SearchForm = ({ searchTerm, onSearchInput, onSearchSubmit }) => {
     return (
-        <form onSubmit={onSearchSubmit}>
+        <form onSubmit={onSearchSubmit} className={styles.searchForm}>
             <InputWithLabel
                 id="search"
                 value={searchTerm}
@@ -56,7 +59,12 @@ const SearchForm = ({ searchTerm, onSearchInput, onSearchSubmit }) => {
             >
                 Search
             </InputWithLabel>
-            <button type="submit" disabled={!searchTerm}>
+            <button
+                type="submit"
+                // className={`${styles.button} ${styles.buttonLarge}`}
+                className={cs(styles.button, styles.buttonLarge)}
+                disabled={!searchTerm}
+            >
                 Submit
             </button>
         </form>
@@ -113,8 +121,8 @@ const App = () => {
     };
 
     return (
-        <>
-            <h1>My Hacker Stories</h1>
+        <div className={styles.container}>
+            <h1 className={styles.headlinePrimary}>My Hacker Stories</h1>
             <SearchForm
                 searchTerm={searchTerm}
                 onSearchInput={handleSearchInput}
@@ -127,7 +135,7 @@ const App = () => {
             ) : (
                 <List list={stories.data} onRemoveItem={handleRemoveStory} />
             )}
-        </>
+        </div>
     );
 };
 const List = ({ list, onRemoveItem }) =>
@@ -137,14 +145,14 @@ const List = ({ list, onRemoveItem }) =>
 
 const Item = ({ item, onRemoveItem }) => {
     return (
-        <div>
-            <span>
+        <div className={styles.item}>
+            <span style={{ width: '50%' }}>
                 <a href={item.url}>{item.title}</a>
             </span>
-            <span> {item.author} </span>
-            <span> {item.num_comments} </span>
-            <span> {item.points} </span>
-            <span>
+            <span style={{ width: '20%' }}> {item.author} </span>
+            <span style={{ width: '10%' }}> {item.num_comments} </span>
+            <span style={{ width: '10%' }}> {item.points} </span>
+            <span style={{ width: '10%' }}>
                 <button type="button" onClick={() => onRemoveItem(item)}>
                     Dismiss
                 </button>
@@ -168,7 +176,9 @@ const InputWithLabel = ({
     }, [isFocused]);
     return (
         <>
-            <label htmlFor={id}>{children}</label>
+            <label htmlFor={id} className={styles.label}>
+                {children}
+            </label>
             &nbsp;
             <input
                 ref={inputRef}
@@ -176,6 +186,7 @@ const InputWithLabel = ({
                 type={type}
                 value={value}
                 onChange={onInputChange}
+                className={styles.input}
             />
         </>
     );
