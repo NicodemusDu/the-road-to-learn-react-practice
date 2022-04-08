@@ -38,12 +38,7 @@ const App = () => {
         console.log('handleSearch: ', event.target.value);
     };
 
-    // const searchStories = initialStories.filter(function (story) {
-    //     console.log('searchStories: ', story.title);
-    //     return story.title.toLowerCase().includes(searchTerm.toLowerCase());
-    // });
-
-    const [stores, setStores] = React.useState(initialStories);
+    const [stores, setStores] = React.useState([]);
 
     const handleRemoveStory = (item) => {
         const newStories = stores.filter(
@@ -65,6 +60,21 @@ const App = () => {
             })
         );
     }, [stores, searchTerm]);
+
+    const getAsyncStories = () =>
+        new Promise((resolve) =>
+            setTimeout(() => {
+                resolve({ data: { stories: initialStories } });
+            }, 2000)
+        );
+
+    // Effect会在首次渲染的时候会被执行一次
+    React.useEffect(() => {
+        getAsyncStories().then((result) => {
+            setStores(result.data.stories);
+        });
+    });
+
     return (
         <>
             <h1>My Hacker Stories</h1>
