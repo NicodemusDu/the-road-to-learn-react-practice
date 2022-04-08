@@ -45,6 +45,23 @@ const storiesReducer = (state, action) => {
             throw new Error();
     }
 };
+const SearchForm = ({ searchTerm, onSearchInput, onSearchSubmit }) => {
+    return (
+        <form onSubmit={onSearchSubmit}>
+            <InputWithLabel
+                id="search"
+                value={searchTerm}
+                isFocused={true}
+                onInputChange={onSearchInput}
+            >
+                Search
+            </InputWithLabel>
+            <button type="submit" disabled={!searchTerm}>
+                Submit
+            </button>
+        </form>
+    );
+};
 
 const App = () => {
     const [searchTerm, setSearchTerm] = useSemiPersistentState(
@@ -90,24 +107,19 @@ const App = () => {
         setSearchTerm(event.target.value);
     };
 
-    const handleSearchSubmit = () => {
+    const handleSearchSubmit = (event) => {
         setUrl(`${API_ENDPOINT}${searchTerm}`);
+        event.preventDefault(); // 阻止浏览器重新加载
     };
 
     return (
         <>
             <h1>My Hacker Stories</h1>
-            <InputWithLabel
-                id="search"
-                value={searchTerm}
-                isFocused={true}
-                onInputChange={handleSearchInput}
-            >
-                Search
-            </InputWithLabel>
-            <button type="button" onClick={handleSearchSubmit}>
-                Submit
-            </button>
+            <SearchForm
+                searchTerm={searchTerm}
+                onSearchInput={handleSearchInput}
+                onSearchSubmit={handleSearchSubmit}
+            />
             <hr />
             {stories.isError && <p>Something went wrong...</p>}
             {stories.isLoding ? (
