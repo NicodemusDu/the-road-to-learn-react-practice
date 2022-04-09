@@ -2,6 +2,8 @@ import React from 'react';
 import axios from 'axios';
 import cs from 'classname';
 
+import { ReactComponent as Check } from './check.svg';
+
 import styles from './App.module.css';
 import styled, { ThemeProvider } from 'styled-components';
 
@@ -61,7 +63,7 @@ const SearchForm = ({ searchTerm, onSearchInput, onSearchSubmit }) => {
                 Search
             </InputWithLabel>
             <StyledButtonLarge type="submit" disabled={!searchTerm}>
-                Submit
+                <Check height="18px" width="18px" />
             </StyledButtonLarge>
         </form>
     );
