@@ -37,3 +37,7 @@
 ## React 性能（高级）
 
 > 使用 memo useMemo useCallback，优化重复渲染和重复复杂计算。（避免过早优化，只有性能瓶颈才进行适当优化）
+
+## 在 React 中使用 TypeScript
+
+> 强类型编程语言 TypeScript，每次使用新类型之前需要提前定义类型。
