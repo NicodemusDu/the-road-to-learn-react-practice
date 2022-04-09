@@ -25,3 +25,7 @@
 ## React 中的 CSS 模块化
 
 > [引入 Create React App 中 CSS 的模块化支持](https://create-react-app.dev/docs/adding-a-css-modules-stylesheet/)
+
+## React 中的样式组件
+
+> CSS-in-JS 和 CSS-in-CSS 这两种策略及其 方法（如： [Styled Components](https://styled-components.com/) 和 CSS Modules）在 React 开发人员中很受欢迎。选择使用最适合你和你的团队的方法。

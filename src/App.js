@@ -3,6 +3,7 @@ import axios from 'axios';
 import cs from 'classname';
 
 import styles from './App.module.css';
+import styled, { ThemeProvider } from 'styled-components';
 
 const API_ENDPOINT = 'https://hn.algolia.com/api/v1/search?query=';
 const useSemiPersistentState = (key, initState) => {
@@ -59,16 +60,91 @@ const SearchForm = ({ searchTerm, onSearchInput, onSearchSubmit }) => {
             >
                 Search
             </InputWithLabel>
-            <button
-                type="submit"
-                // className={`${styles.button} ${styles.buttonLarge}`}
-                className={cs(styles.button, styles.buttonLarge)}
-                disabled={!searchTerm}
-            >
+            <StyledButtonLarge type="submit" disabled={!searchTerm}>
                 Submit
-            </button>
+            </StyledButtonLarge>
         </form>
     );
+};
+
+const StyledContainer = styled.div`
+    height: 100vw;
+    padding: 20px;
+
+    background: #83a4d4;
+    background: linear-gradient(to left, #ff0000, #83a4d4);
+
+    color: #171212;
+`;
+
+const StyledHeadlinePrimary = styled.h1`
+    font-size: 48px;
+    font-weight: 300;
+    letter-spacing: 2px;
+`;
+
+const StyleItem = styled.div`
+    display: flex;
+    align-items: center;
+    padding-bottom: 5px;
+`;
+
+const StyleColumn = styled.span`
+    padding: 0 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+
+    a {
+        color: ${(props) => props.theme.main};
+    }
+
+    width: ${(props) => props.width};
+`;
+
+const StyledButton = styled.button`
+    background: transparent;
+    border: 1px solid #121212;
+    padding: 5px;
+    cursor: pointer;
+
+    transition: all 0.1s ease-in;
+
+    &:hover {
+        background: #121212;
+        color: #ffffff;
+    }
+`;
+
+const StyledButtonSmall = styled(StyledButton)`
+    padding: 5px;
+`;
+
+const StyledButtonLarge = styled(StyledButton)`
+    padding: 10px;
+`;
+const StyledButtonForm = styled(StyledButton)`
+    padding: 10px 0 20px 0;
+    display: flex;
+    align-items: baseline;
+`;
+
+const StyledLabel = styled.label`
+    border-top: 1px solid #171212;
+    border-left: 1px solid #171212;
+    padding-left: 5px;
+    font-size: 24px;
+`;
+const StyledInput = styled.input`
+    border: none;
+    border-bottom: 1px solid #171212;
+    background-color: transparent;
+    font-size: 24px;
+`;
+
+const themeSetting = {
+    main: 'palevioletred',
 };
 
 const App = () => {
@@ -121,21 +197,26 @@ const App = () => {
     };
 
     return (
-        <div className={styles.container}>
-            <h1 className={styles.headlinePrimary}>My Hacker Stories</h1>
-            <SearchForm
-                searchTerm={searchTerm}
-                onSearchInput={handleSearchInput}
-                onSearchSubmit={handleSearchSubmit}
-            />
-            <hr />
-            {stories.isError && <p>Something went wrong...</p>}
-            {stories.isLoding ? (
-                <p>Loding...</p>
-            ) : (
-                <List list={stories.data} onRemoveItem={handleRemoveStory} />
-            )}
-        </div>
+        <StyledContainer>
+            <ThemeProvider theme={themeSetting}>
+                <StyledHeadlinePrimary>My Hacker Stories</StyledHeadlinePrimary>
+                <SearchForm
+                    searchTerm={searchTerm}
+                    onSearchInput={handleSearchInput}
+                    onSearchSubmit={handleSearchSubmit}
+                />
+                <hr />
+                {stories.isError && <p>Something went wrong...</p>}
+                {stories.isLoding ? (
+                    <p>Loding...</p>
+                ) : (
+                    <List
+                        list={stories.data}
+                        onRemoveItem={handleRemoveStory}
+                    />
+                )}
+            </ThemeProvider>
+        </StyledContainer>
     );
 };
 const List = ({ list, onRemoveItem }) =>
@@ -145,19 +226,24 @@ const List = ({ list, onRemoveItem }) =>
 
 const Item = ({ item, onRemoveItem }) => {
     return (
-        <div className={styles.item}>
-            <span style={{ width: '50%' }}>
+        <StyleItem>
+            <StyleColumn style={{ width: '50%' }}>
                 <a href={item.url}>{item.title}</a>
-            </span>
-            <span style={{ width: '20%' }}> {item.author} </span>
-            <span style={{ width: '10%' }}> {item.num_comments} </span>
-            <span style={{ width: '10%' }}> {item.points} </span>
-            <span style={{ width: '10%' }}>
-                <button type="button" onClick={() => onRemoveItem(item)}>
+            </StyleColumn>
+            <StyleColumn style={{ width: '20%' }}> {item.author} </StyleColumn>
+            <StyleColumn style={{ width: '10%' }}>
+                {item.num_comments}
+            </StyleColumn>
+            <StyleColumn style={{ width: '10%' }}> {item.points} </StyleColumn>
+            <StyleColumn style={{ width: '10%' }}>
+                <StyledButtonSmall
+                    type="button"
+                    onClick={() => onRemoveItem(item)}
+                >
                     Dismiss
-                </button>
-            </span>
-        </div>
+                </StyledButtonSmall>
+            </StyleColumn>
+        </StyleItem>
     );
 };
 const InputWithLabel = ({
@@ -176,9 +262,7 @@ const InputWithLabel = ({
     }, [isFocused]);
     return (
         <>
-            <label htmlFor={id} className={styles.label}>
-                {children}
-            </label>
+            <StyledLabel htmlFor={id}>{children}</StyledLabel>
             &nbsp;
             <input
                 ref={inputRef}
