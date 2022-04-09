@@ -1,20 +1,28 @@
 import React from 'react';
 import axios from 'axios';
-import cs from 'classname';
+// import cs from 'classname';
 
 import { ReactComponent as Check } from './check.svg';
 
 import styles from './App.module.css';
-import styled, { ThemeProvider } from 'styled-components';
+import { ThemeProvider } from 'styled-components';
+import * as myStyled from './Css.js';
 
 const API_ENDPOINT = 'https://hn.algolia.com/api/v1/search?query=';
 const useSemiPersistentState = (key, initState) => {
+    const isMounted = React.useRef(false); // 避免浏览器首次渲染的时候调用effect
+
     const [value, setValue] = React.useState(
         localStorage.getItem(key) || initState
     );
 
     React.useEffect(() => {
-        localStorage.setItem(key, value);
+        if (!isMounted.current) {
+            isMounted.current = true;
+        } else {
+            localStorage.setItem(key, value);
+            console.log('run useEffect');
+        }
     }, [value, key]);
     return [value, setValue];
 };
@@ -51,103 +59,29 @@ const storiesReducer = (state, action) => {
             throw new Error();
     }
 };
-const SearchForm = ({ searchTerm, onSearchInput, onSearchSubmit }) => {
-    return (
-        <form onSubmit={onSearchSubmit} className={styles.searchForm}>
-            <InputWithLabel
-                id="search"
-                value={searchTerm}
-                isFocused={true}
-                onInputChange={onSearchInput}
-            >
-                Search
-            </InputWithLabel>
-            <StyledButtonLarge type="submit" disabled={!searchTerm}>
-                <Check height="18px" width="18px" />
-            </StyledButtonLarge>
-        </form>
-    );
-};
-
-const StyledContainer = styled.div`
-    height: 100vw;
-    padding: 20px;
-
-    background: #83a4d4;
-    background: linear-gradient(to left, #ff0000, #83a4d4);
-
-    color: #171212;
-`;
-
-const StyledHeadlinePrimary = styled.h1`
-    font-size: 48px;
-    font-weight: 300;
-    letter-spacing: 2px;
-`;
-
-const StyleItem = styled.div`
-    display: flex;
-    align-items: center;
-    padding-bottom: 5px;
-`;
-
-const StyleColumn = styled.span`
-    padding: 0 5px;
-    white-space: nowrap;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-
-    a {
-        color: ${(props) => props.theme.main};
+const SearchForm = React.memo(
+    ({ searchTerm, onSearchInput, onSearchSubmit }) => {
+        console.debug(' run SearchForm');
+        return (
+            <form onSubmit={onSearchSubmit} className={styles.searchForm}>
+                <InputWithLabel
+                    id="search"
+                    value={searchTerm}
+                    isFocused={true}
+                    onInputChange={onSearchInput}
+                >
+                    Search
+                </InputWithLabel>
+                <myStyled.StyledButtonLarge
+                    type="submit"
+                    disabled={!searchTerm}
+                >
+                    <Check height="18px" width="18px" />
+                </myStyled.StyledButtonLarge>
+            </form>
+        );
     }
-
-    width: ${(props) => props.width};
-`;
-
-const StyledButton = styled.button`
-    background: transparent;
-    border: 1px solid #121212;
-    padding: 5px;
-    cursor: pointer;
-
-    transition: all 0.1s ease-in;
-
-    &:hover {
-        background: #121212;
-        color: #ffffff;
-    }
-`;
-
-const StyledButtonSmall = styled(StyledButton)`
-    padding: 5px;
-`;
-
-const StyledButtonLarge = styled(StyledButton)`
-    padding: 10px;
-`;
-const StyledButtonForm = styled(StyledButton)`
-    padding: 10px 0 20px 0;
-    display: flex;
-    align-items: baseline;
-`;
-
-const StyledLabel = styled.label`
-    border-top: 1px solid #171212;
-    border-left: 1px solid #171212;
-    padding-left: 5px;
-    font-size: 24px;
-`;
-const StyledInput = styled.input`
-    border: none;
-    border-bottom: 1px solid #171212;
-    background-color: transparent;
-    font-size: 24px;
-`;
-
-const themeSetting = {
-    main: 'palevioletred',
-};
+);
 
 const App = () => {
     const [searchTerm, setSearchTerm] = useSemiPersistentState(
@@ -163,11 +97,11 @@ const App = () => {
         isError: false,
     });
 
-    // Effect会在首次渲染的时候会被执行一次
     const handleFetchStories = React.useCallback(async () => {
         dispatchStories({ type: 'STORIES_FETCH_INIT' });
 
         try {
+            console.log('run handleFetchStories');
             const result = await axios.get(url);
             dispatchStories({
                 type: 'STORIES_FETCH_SUCCESS',
@@ -178,30 +112,43 @@ const App = () => {
         }
     }, [url]);
 
+    // Effect会在首次渲染的时候会被执行一次
     React.useEffect(() => {
         handleFetchStories();
     }, [handleFetchStories]);
 
-    const handleRemoveStory = (item) => {
+    const handleRemoveStory = React.useCallback((item) => {
         dispatchStories({
             type: 'REMOVE_STORY',
             payload: item,
         });
-    };
+    }, []);
 
-    const handleSearchInput = (event) => {
+    const handleSearchInput = React.useCallback((event) => {
         setSearchTerm(event.target.value);
-    };
+    }, []);
 
-    const handleSearchSubmit = (event) => {
+    const handleSearchSubmit = React.useCallback((event) => {
         setUrl(`${API_ENDPOINT}${searchTerm}`);
         event.preventDefault(); // 阻止浏览器重新加载
-    };
+    }, []);
 
+    const getSumComments = (stories) => {
+        console.log('run getSumComments');
+
+        return stories.data.reduce(
+            (result, value) => result + value.num_comments,
+            0
+        );
+    };
+    const sumComments = React.useMemo(() => getSumComments(stories), [stories]);
+    console.log('run App');
     return (
-        <StyledContainer>
-            <ThemeProvider theme={themeSetting}>
-                <StyledHeadlinePrimary>My Hacker Stories</StyledHeadlinePrimary>
+        <myStyled.StyledContainer>
+            <ThemeProvider theme={myStyled.themeSetting}>
+                <myStyled.StyledHeadlinePrimary>
+                    My Hacker Stories: {sumComments}
+                </myStyled.StyledHeadlinePrimary>
                 <SearchForm
                     searchTerm={searchTerm}
                     onSearchInput={handleSearchInput}
@@ -218,34 +165,43 @@ const App = () => {
                     />
                 )}
             </ThemeProvider>
-        </StyledContainer>
+        </myStyled.StyledContainer>
     );
 };
-const List = ({ list, onRemoveItem }) =>
-    list.map((item) => (
+const List = React.memo(({ list, onRemoveItem }) => {
+    console.log('run List');
+    return list.map((item) => (
         <Item key={item.objectID} item={item} onRemoveItem={onRemoveItem} />
     ));
+});
 
 const Item = ({ item, onRemoveItem }) => {
+    console.debug('run Item');
     return (
-        <StyleItem>
-            <StyleColumn style={{ width: '50%' }}>
+        <myStyled.StyleItem>
+            <myStyled.StyleColumn style={{ width: '50%' }}>
                 <a href={item.url}>{item.title}</a>
-            </StyleColumn>
-            <StyleColumn style={{ width: '20%' }}> {item.author} </StyleColumn>
-            <StyleColumn style={{ width: '10%' }}>
+            </myStyled.StyleColumn>
+            <myStyled.StyleColumn style={{ width: '20%' }}>
+                {' '}
+                {item.author}{' '}
+            </myStyled.StyleColumn>
+            <myStyled.StyleColumn style={{ width: '10%' }}>
                 {item.num_comments}
-            </StyleColumn>
-            <StyleColumn style={{ width: '10%' }}> {item.points} </StyleColumn>
-            <StyleColumn style={{ width: '10%' }}>
-                <StyledButtonSmall
+            </myStyled.StyleColumn>
+            <myStyled.StyleColumn style={{ width: '10%' }}>
+                {' '}
+                {item.points}{' '}
+            </myStyled.StyleColumn>
+            <myStyled.StyleColumn style={{ width: '10%' }}>
+                <myStyled.StyledButtonSmall
                     type="button"
                     onClick={() => onRemoveItem(item)}
                 >
                     Dismiss
-                </StyledButtonSmall>
-            </StyleColumn>
-        </StyleItem>
+                </myStyled.StyledButtonSmall>
+            </myStyled.StyleColumn>
+        </myStyled.StyleItem>
     );
 };
 const InputWithLabel = ({
@@ -264,7 +220,7 @@ const InputWithLabel = ({
     }, [isFocused]);
     return (
         <>
-            <StyledLabel htmlFor={id}>{children}</StyledLabel>
+            <myStyled.StyledLabel htmlFor={id}>{children}</myStyled.StyledLabel>
             &nbsp;
             <input
                 ref={inputRef}

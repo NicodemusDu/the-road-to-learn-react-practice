@@ -29,3 +29,11 @@
 ## React 中的样式组件
 
 > CSS-in-JS 和 CSS-in-CSS 这两种策略及其 方法（如： [Styled Components](https://styled-components.com/) 和 CSS Modules）在 React 开发人员中很受欢迎。选择使用最适合你和你的团队的方法。
+
+## React 中的 SVG
+
+# React 维护
+
+## React 性能（高级）
+
+> 使用 memo useMemo useCallback，优化重复渲染和重复复杂计算。（避免过早优化，只有性能瓶颈才进行适当优化）
