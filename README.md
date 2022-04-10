@@ -41,3 +41,9 @@
 ## 在 React 中使用 TypeScript
 
 > 强类型编程语言 TypeScript，每次使用新类型之前需要提前定义类型。
+
+## 从单元测试到集成测试
+
+> jest 单元测试工具
+> 每一个文件的测试文件定义为 filename.test.js。
+> 使用 npm run test 执行单元测试

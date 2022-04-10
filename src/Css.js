@@ -4,7 +4,7 @@ export const StyledContainer = styled.div`
     padding: 20px;
 
     background: #83a4d4;
-    background: linear-gradient(to left, #ff0000, #83a4d4);
+    background: linear-gradient(to left, #bbbbbb, #222222);
 
     color: #171212;
 `;
