@@ -3,7 +3,7 @@ import renderer from 'react-test-renderer';
 import axios from 'axios';
 
 import App from './App';
-import List, { Item } from './List';
+import List, { Item } from './list/List';
 import SearchForm from './SearchForm';
 import InputWithLabel from './InputWithLabel';
 
