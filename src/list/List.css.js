@@ -3,7 +3,7 @@ import Styled from 'styled-components';
 const StyledItem = Styled.div`
     display: flex;
     background: #ffffff;
-    padding-left: 50px;
+    padding-left: 10px;
 `;
 const StyledColumn = Styled.span`
     padding: 0 5 px;
@@ -12,7 +12,7 @@ const StyledColumn = Styled.span`
 `;
 
 const StyledButton = Styled.button`
-    
+
 `;
 
 export default StyledItem;

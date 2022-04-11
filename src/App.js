@@ -3,6 +3,7 @@ import axios from 'axios';
 import List from './list/List';
 import SearchForm from './SearchForm';
 import LastSearches from './LastSearches';
+import Styled from 'styled-components';
 
 const API_ENDPOINT = 'https://hn.algolia.com/api/v1/search?query=';
 
@@ -31,7 +32,10 @@ const storiesReducer = (state, action) => {
                 ...state,
                 isLoading: false,
                 isError: false,
-                data: action.payload,
+                data: action.page
+                    ? state.data.concat(action.payload)
+                    : action.payload,
+                page: action.page + 1,
             };
         case 'STORIES_FETCH_FAILURE':
             return {
@@ -61,26 +65,35 @@ const App = () => {
 
     const [stories, dispatchStories] = React.useReducer(storiesReducer, {
         data: [],
+        page: 0,
         isLoading: false,
         isError: false,
     });
 
     const getUrl = (url) => API_ENDPOINT + url;
 
-    const handleFetchStories = React.useCallback(async () => {
-        dispatchStories({ type: 'STORIES_FETCH_INIT' });
+    const handleFetchStories = React.useCallback(
+        async (page = 0) => {
+            dispatchStories({ type: 'STORIES_FETCH_INIT' });
 
-        try {
-            const result = await axios.get(getUrl(urls[urls.length - 1]));
+            try {
+                let url = getUrl(urls[urls.length - 1]);
+                url = url + '&page=' + page;
+                console.log('url', url);
 
-            dispatchStories({
-                type: 'STORIES_FETCH_SUCCESS',
-                payload: result.data.hits,
-            });
-        } catch {
-            dispatchStories({ type: 'STORIES_FETCH_FAILURE' });
-        }
-    }, [urls]);
+                const result = await axios.get(url);
+
+                dispatchStories({
+                    type: 'STORIES_FETCH_SUCCESS',
+                    payload: result.data.hits,
+                    page: result.data.page,
+                });
+            } catch {
+                dispatchStories({ type: 'STORIES_FETCH_FAILURE' });
+            }
+        },
+        [urls]
+    );
 
     React.useEffect(() => {
         handleFetchStories();
@@ -109,6 +122,10 @@ const App = () => {
 
     const handleSearch = (searchTerm) => {
         setUrls(urls.concat(searchTerm));
+    };
+
+    const handleMore = (page) => {
+        handleFetchStories(page);
     };
 
     const getLastSearches = (urls) => {
@@ -144,13 +161,43 @@ const App = () => {
             <hr />
             {/* <Sort /> */}
             {stories.isError && <p>Something went wrong ...</p>}
+            <List list={stories.data} onRemoveItem={handleRemoveStory} />
             {stories.isLoading ? (
                 <p>Loading ...</p>
             ) : (
-                <List list={stories.data} onRemoveItem={handleRemoveStory} />
+                <StyledMoreButton
+                    type="button"
+                    onClick={() => handleMore(stories.page)}
+                >
+                    More
+                </StyledMoreButton>
             )}
+            <hr />
         </div>
     );
 };
+
+const StyledMoreButton = Styled.button`
+    display: block;
+    margin:0 auto;
+
+    background-color: #4CAF50;
+    border: none;
+    border-radius: 2px;
+    color:  white;
+    padding: 15px 32px;
+    text-align:center;
+    text-decoration: none;
+    font-size: 24px;
+
+    &:hover{
+        color: black;
+    }
+
+    &:active{
+        color: black;
+        background-color: #777777;
+    }
+`;
 
 export default App;
