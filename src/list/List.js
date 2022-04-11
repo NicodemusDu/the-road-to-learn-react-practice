@@ -26,7 +26,6 @@ const List = ({ list, onRemoveItem }) => {
         : sortFunction(list);
 
     const getButtonText = (text, sort) => {
-        console.log('getButtonText\t', sort);
         if (String(text).toLowerCase() === sort.sortKey.toLowerCase()) {
             return sort.isReverse ? '↑' : '↓';
         }
