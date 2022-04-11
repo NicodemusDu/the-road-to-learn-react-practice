@@ -1,56 +1,71 @@
 import React from 'react';
-import StyledItem, { StyledColumn } from './List.css';
+import StyledItem, { StyledColumn, StyledButton } from './List.css';
 import { sortBy } from 'lodash';
 
 const SORTS = {
     NONE: (list) => list,
     TITLE: (list) => sortBy(list, 'title'),
     AUTHOR: (list) => sortBy(list, 'author'),
-    COMMENT: (list) => sortBy(list, 'num_comments').reverse(),
-    POINT: (list) => sortBy(list, 'points').reverse(),
-
-    NONE_REVERSE: (list) => list,
-    TITLE_REVERSE: (list) => sortBy(list, 'title').reverse(),
-    AUTHOR_REVERSE: (list) => sortBy(list, 'author').reverse(),
-    COMMENT_REVERSE: (list) => sortBy(list, 'num_comments'),
-    POINT_REVERSE: (list) => sortBy(list, 'points'),
+    COMMENTS: (list) => sortBy(list, 'num_comments').reverse(),
+    POINTS: (list) => sortBy(list, 'points').reverse(),
 };
 
 const List = ({ list, onRemoveItem }) => {
-    const [sort, setSort] = React.useState('NONE');
+    const [sort, setSort] = React.useState({
+        sortKey: 'NONE',
+        isReverse: false,
+    });
     const handleSort = (sortKey) => {
         console.log(sortKey);
-        if (sort === sortKey) {
-            sortKey += '_REVERSE';
-        }
-        setSort(sortKey);
+        const isReverse = sort.sortKey === sortKey && !sort.isReverse;
+        setSort({ sortKey, isReverse });
     };
-    console.log('sort: \t', sort);
-    const sortFunction = SORTS[sort];
-    const sortedList = sortFunction(list);
+    const sortFunction = SORTS[sort.sortKey];
+    const sortedList = sort.isReverse
+        ? sortFunction(list).reverse()
+        : sortFunction(list);
+
+    const getButtonText = (text, sort) => {
+        console.log('getButtonText\t', sort);
+        if (String(text).toLowerCase() === sort.sortKey.toLowerCase()) {
+            return sort.isReverse ? '↑' : '↓';
+        }
+    };
 
     return (
         <div>
             <StyledItem>
                 <StyledColumn width="50%">
-                    <button type="button" onClick={() => handleSort('TITLE')}>
-                        Title
-                    </button>
+                    <StyledButton
+                        type="button"
+                        onClick={() => handleSort('TITLE')}
+                    >
+                        Title{getButtonText('Title', sort)}
+                    </StyledButton>
                 </StyledColumn>
                 <StyledColumn width="20%">
-                    <button type="button" onClick={() => handleSort('AUTHOR')}>
-                        Author
-                    </button>
+                    <StyledButton
+                        type="button"
+                        onClick={() => handleSort('AUTHOR')}
+                    >
+                        Author{getButtonText('Author', sort)}
+                    </StyledButton>
                 </StyledColumn>
                 <StyledColumn width="10%">
-                    <button type="button" onClick={() => handleSort('COMMENT')}>
-                        Comments
-                    </button>
+                    <StyledButton
+                        type="button"
+                        onClick={() => handleSort('COMMENTS')}
+                    >
+                        Comments{getButtonText('Comments', sort)}
+                    </StyledButton>
                 </StyledColumn>
                 <StyledColumn width="10%">
-                    <button type="button" onClick={() => handleSort('POINT')}>
-                        Points
-                    </button>
+                    <StyledButton
+                        type="button"
+                        onClick={() => handleSort('POINTS')}
+                    >
+                        Points{getButtonText('Points', sort)}
+                    </StyledButton>
                 </StyledColumn>
                 <StyledColumn width="10%">Actions</StyledColumn>
             </StyledItem>

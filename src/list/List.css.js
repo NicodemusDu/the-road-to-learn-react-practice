@@ -2,12 +2,18 @@ import Styled from 'styled-components';
 
 const StyledItem = Styled.div`
     display: flex;
-    background: #ffffff
+    background: #ffffff;
+    padding-left: 50px;
 `;
 const StyledColumn = Styled.span`
     padding: 0 5 px;
+    
     width:${(props) => props.width};
 `;
 
+const StyledButton = Styled.button`
+    
+`;
+
 export default StyledItem;
-export { StyledColumn };
+export { StyledColumn, StyledButton };
